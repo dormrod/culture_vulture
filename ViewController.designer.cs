@@ -12,6 +12,18 @@ namespace CultureVulture
 	[Register ("ViewController")]
 	partial class ViewController
 	{
-	
-    }
+		[Outlet]
+		AppKit.NSPopUpButton AddMediaMedia { get; set; }
+
+		[Action ("AddMediaClicked:")]
+		partial void AddMediaClicked (Foundation.NSObject sender);
+		
+		void ReleaseDesignerOutlets ()
+		{
+			if (AddMediaMedia != null) {
+				AddMediaMedia.Dispose ();
+				AddMediaMedia = null;
+			}
+		}
+	}
 }
