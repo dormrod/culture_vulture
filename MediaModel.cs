@@ -152,6 +152,17 @@ namespace CultureVulture
 
         #region Constructors
         public MediaModel(){}
+        
+		public MediaModel(string mediaIn, string titleIn, string creatorIn, string languageIn, string dateIn, int ratingIn)
+        {
+            //Initialise
+            media = mediaIn;
+            title = titleIn;
+            creator = creatorIn;
+            language = languageIn;
+            date = dateIn;
+            rating = ratingIn;
+		}
 
         public MediaModel(string mediaIn, string titleIn, string creatorIn, string languageIn, string dateIn, int ratingIn, string goodreadsIdIn)
         {
@@ -181,7 +192,7 @@ namespace CultureVulture
             conn = null;
 
             // Update parameters
-            ID = Guid.NewGuid().ToString();
+            id = Guid.NewGuid().ToString();
             edited = true;
 	     
             // Execute query
