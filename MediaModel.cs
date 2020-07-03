@@ -11,6 +11,7 @@ namespace CultureVulture
 	[Register("MediaModel")]
     public class MediaModel: NSObject
     {
+        //Based on tutorial: https://docs.microsoft.com/en-us/xamarin/mac/app-fundamentals/databases
         //Model for SQLite database entry
 
         #region Variables
@@ -162,6 +163,7 @@ namespace CultureVulture
             language = languageIn;
             date = dateIn;
             rating = ratingIn;
+            goodreadsId = "X";
 		}
 
         public MediaModel(string mediaIn, string titleIn, string creatorIn, string languageIn, string dateIn, int ratingIn, string goodreadsIdIn)
@@ -279,11 +281,8 @@ namespace CultureVulture
             using (var command = connection.CreateCommand())
             {
                 // Create new command
-                command.CommandText = "SELECT * FROM media WHERE id=@id";
-
-                // Populate with data from the record
-                command.Parameters.AddWithValue("@id", id);
-
+                command.CommandText = string.Format("SELECT * FROM media WHERE id='{0}';",id);
+                Console.WriteLine(command.CommandText);
                 using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
@@ -295,11 +294,17 @@ namespace CultureVulture
                         creator = (string)reader[3];
                         language = (string)reader[4];
                         date = (string)reader[5];
-                        rating = (int)reader[6];
+						Console.WriteLine(id);
+						Console.WriteLine(media);
+						Console.WriteLine(title);
+						Console.WriteLine(date);
+						Console.WriteLine(reader[6].GetType());
+                        rating = (Int32)(Int64)reader[6];
                         edited = (bool)reader[7];
                         goodreadsId = (string)reader[8];
                     }
                 }
+
             }
 
             // Should we close the connection to the database

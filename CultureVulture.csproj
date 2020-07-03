@@ -126,6 +126,8 @@
       <DependentUpon>ViewController.cs</DependentUpon>
     </Compile>
     <Compile Include="MediaModel.cs" />
+    <Compile Include="MediaTableDataSource.cs" />
+    <Compile Include="MediaTableDelegate.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Main.storyboard" />

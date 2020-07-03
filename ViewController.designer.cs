@@ -31,7 +31,34 @@ namespace CultureVulture
 		AppKit.NSTextField AddMediaTitle { get; set; }
 
 		[Outlet]
+		AppKit.NSTableColumn CreatorColumn { get; set; }
+
+		[Outlet]
+		AppKit.NSTableColumn DateColumn { get; set; }
+
+		[Outlet]
 		AppKit.NSButton HardReset { get; set; }
+
+		[Outlet]
+		AppKit.NSTableColumn LanguageColumn { get; set; }
+
+		[Outlet]
+		AppKit.NSTableColumn MediaColumn { get; set; }
+
+		[Outlet]
+		AppKit.NSTableView MediaTable { get; set; }
+
+		[Outlet]
+		AppKit.NSTableColumn RatingColumn { get; set; }
+
+		[Outlet]
+		AppKit.NSPopUpButton SearchMediaField { get; set; }
+
+		[Outlet]
+		AppKit.NSSearchField SearchMediaSearch { get; set; }
+
+		[Outlet]
+		AppKit.NSTableColumn TitleColumn { get; set; }
 
 		[Outlet]
 		AppKit.NSButton UnlockReset { get; set; }
@@ -41,6 +68,9 @@ namespace CultureVulture
 
 		[Action ("HardResetClicked:")]
 		partial void HardResetClicked (Foundation.NSObject sender);
+
+		[Action ("SearchMediaClicked:")]
+		partial void SearchMediaClicked (Foundation.NSObject sender);
 
 		[Action ("UnlockResetClicked:")]
 		partial void UnlockResetClicked (Foundation.NSObject sender);
@@ -77,14 +107,59 @@ namespace CultureVulture
 				AddMediaTitle = null;
 			}
 
+			if (HardReset != null) {
+				HardReset.Dispose ();
+				HardReset = null;
+			}
+
+			if (SearchMediaField != null) {
+				SearchMediaField.Dispose ();
+				SearchMediaField = null;
+			}
+
+			if (SearchMediaSearch != null) {
+				SearchMediaSearch.Dispose ();
+				SearchMediaSearch = null;
+			}
+
 			if (UnlockReset != null) {
 				UnlockReset.Dispose ();
 				UnlockReset = null;
 			}
 
-			if (HardReset != null) {
-				HardReset.Dispose ();
-				HardReset = null;
+			if (MediaTable != null) {
+				MediaTable.Dispose ();
+				MediaTable = null;
+			}
+
+			if (MediaColumn != null) {
+				MediaColumn.Dispose ();
+				MediaColumn = null;
+			}
+
+			if (TitleColumn != null) {
+				TitleColumn.Dispose ();
+				TitleColumn = null;
+			}
+
+			if (CreatorColumn != null) {
+				CreatorColumn.Dispose ();
+				CreatorColumn = null;
+			}
+
+			if (LanguageColumn != null) {
+				LanguageColumn.Dispose ();
+				LanguageColumn = null;
+			}
+
+			if (RatingColumn != null) {
+				RatingColumn.Dispose ();
+				RatingColumn = null;
+			}
+
+			if (DateColumn != null) {
+				DateColumn.Dispose ();
+				DateColumn = null;
 			}
 		}
 	}

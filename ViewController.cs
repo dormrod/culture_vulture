@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
 using AppKit;
@@ -32,12 +33,27 @@ namespace CultureVulture
             }
         }
 
+        public override void AwakeFromNib()
+        {
+            base.AwakeFromNib();
+
+            // Create the Product Table Data Source and populate it
+            var DataSource = new MediaTableDataSource();
+
+            var test = new MediaModel("Book", "XXX", "YYY", "EN", "01-01-20", 5);
+            DataSource.MediaRecords.Add(test);
+
+            // Populate the Product Table
+            MediaTable.DataSource = DataSource;
+            MediaTable.Delegate = new MediaTableDelegate(DataSource);
+        }
+
         partial void AddMediaClicked(NSObject sender)
         {
             //Add media to database
 
             //Create new media record
-            string media = AddMediaMedia.StringValue;
+            string media = AddMediaMedia.TitleOfSelectedItem;
             string title = AddMediaTitle.StringValue;
             string creator = AddMediaCreator.StringValue;
             string language = AddMediaLanguage.StringValue;
@@ -48,6 +64,45 @@ namespace CultureVulture
             var conn = GetDatabaseConnection();
             record.Create(conn);
         }
+
+        partial void SearchMediaClicked(NSObject sender)
+        {
+            //Search database for user query
+
+			//Open database connection 
+            var conn = GetDatabaseConnection();
+            conn.Open();
+            var command = conn.CreateCommand();
+
+            //Get search string
+            string field = SearchMediaField.TitleOfSelectedItem;
+            string search = SearchMediaSearch.StringValue;
+            command.CommandText = string.Format("SELECT * FROM media WHERE {0} LIKE '{1}';",field,search);
+
+			//Get IDs of results
+            SQLiteDataReader reader = command.ExecuteReader();
+            List<string> RecordIDs = new List<string>();
+            while (reader.Read())
+            {
+                string ID = reader.GetString(0);
+                RecordIDs.Add(ID);
+            }
+
+            //Get media records and update table
+            var DataSource = new MediaTableDataSource();
+            foreach(string ID in RecordIDs)
+            {
+                var Record = new MediaModel();
+                Record.Load(conn, ID);
+                DataSource.MediaRecords.Add(Record);
+			}
+            Console.WriteLine(DataSource.MediaRecords[0].Media);
+            MediaTable.DataSource = DataSource;
+            MediaTable.Delegate = new MediaTableDelegate(DataSource);
+            MediaTable.ReloadData();
+            conn.Close();
+        }
+
 
         partial void UnlockResetClicked(NSObject sender)
         {
