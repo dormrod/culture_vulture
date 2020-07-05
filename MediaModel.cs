@@ -55,7 +55,7 @@ namespace CultureVulture
                 WillChangeValue("Media");
                 media = value;
                 DidChangeValue("Media");
-                if (conn != null) Update(conn);
+                if (conn != null) Update(conn,"media");
             }
         }
 		
@@ -68,7 +68,7 @@ namespace CultureVulture
                 WillChangeValue("Title");
                 title = value;
                 DidChangeValue("Title");
-                if (conn != null) Update(conn);
+                if (conn != null) Update(conn,"title");
             }
         }
 		
@@ -81,7 +81,7 @@ namespace CultureVulture
                 WillChangeValue("Creator");
                 creator = value;
                 DidChangeValue("Creator");
-                if (conn != null) Update(conn);
+                if (conn != null) Update(conn,"creator");
             }
         }
 		
@@ -94,7 +94,7 @@ namespace CultureVulture
                 WillChangeValue("Language");
                 language = value;
                 DidChangeValue("Language");
-                if (conn != null) Update(conn);
+                if (conn != null) Update(conn,"language");
             }
         }
 		
@@ -107,7 +107,7 @@ namespace CultureVulture
                 WillChangeValue("Date");
                 date = value;
                 DidChangeValue("Date");
-                if (conn != null) Update(conn);
+                if (conn != null) Update(conn,"date");
             }
         }
 		
@@ -120,7 +120,7 @@ namespace CultureVulture
                 WillChangeValue("Rating");
                 rating = value;
                 DidChangeValue("Rating");
-                if (conn != null) Update(conn);
+                if (conn != null) Update(conn,"rating");
             }
         }
 		
@@ -133,7 +133,7 @@ namespace CultureVulture
                 WillChangeValue("GoodreadsID");
                 goodreadsId = value;
                 DidChangeValue("GoodreadsID");
-                if (conn != null) Update(conn);
+                if (conn != null) Update(conn,"goodreadsId");
             }
         }
 		
@@ -146,7 +146,7 @@ namespace CultureVulture
                 WillChangeValue("Edited");
                 edited = value;
                 DidChangeValue("Edited");
-                if (conn != null) Update(conn);
+                if (conn != null) Update(conn,"edited");
             }
         }
         #endregion
@@ -224,7 +224,7 @@ namespace CultureVulture
             conn = connection;
         }
 
-        public void Update(SQLiteConnection connection)
+        public void Update(SQLiteConnection connection, string field)
         {
             //Update record in SQLite table
 
@@ -233,24 +233,57 @@ namespace CultureVulture
             
 			//Update parameters
 			edited = true;
-
+            
             // Execute query
             connection.Open();
             using (var command = connection.CreateCommand())
             {
                 // Create new command
-                command.CommandText = "UPDATE INTO media(id, media, title, creator, language, date, rating, edited, goodreadsId) VALUES(@id, @media, @title, @creator, @language, @date, @rating, @edited, @goodreadsId)";
+				switch(field)
+                {
+                    case ("media"):
+                        {
+							command.CommandText = string.Format("UPDATE media SET {0}='{1}' WHERE id='{2}'",field,media,id);
+                            break; 
+						}
+                    case ("title"):
+                        {
+							command.CommandText = string.Format("UPDATE media SET {0}='{1}' WHERE id='{2}'",field,title,id);
+                            break; 
+						}
+                    case ("creator"):
+                        {
+							command.CommandText = string.Format("UPDATE media SET {0}='{1}' WHERE id='{2}'",field,creator,id);
+                            break; 
+						}
+                    case ("language"):
+                        {
+							command.CommandText = string.Format("UPDATE media SET {0}='{1}' WHERE id='{2}'",field,language,id);
+                            break; 
+						}
+                    case ("date"):
+                        {
+							command.CommandText = string.Format("UPDATE media SET {0}='{1}' WHERE id='{2}'",field,date,id);
+                            break; 
+						}
+                    case ("goodreadsId"):
+                        {
+							command.CommandText = string.Format("UPDATE media SET {0}='{1}' WHERE id='{2}'",field,goodreadsId,id);
+                            break; 
+						}
+                    case ("rating"):
+                        {
+							command.CommandText = string.Format("UPDATE media SET {0}={1} WHERE id='{2}'",field,rating,id);
+                            break; 
+						}
+                    case ("edited"):
+                        {
+							command.CommandText = string.Format("UPDATE media SET {0}={1} WHERE id='{2}'",field,edited,id);
+                            break; 
+						}
+				};
 
-                // Populate with data from the record
-                command.Parameters.AddWithValue("@id", id);
-                command.Parameters.AddWithValue("@media", media);
-                command.Parameters.AddWithValue("@title", title);
-                command.Parameters.AddWithValue("@creator", creator);
-                command.Parameters.AddWithValue("@language", language);
-                command.Parameters.AddWithValue("@date", date);
-                command.Parameters.AddWithValue("@rating", rating);
-                command.Parameters.AddWithValue("@edited", edited);
-                command.Parameters.AddWithValue("@goodreadsId", goodreadsId);
+                Console.WriteLine(command.CommandText);
 
                 // Write to database
                 command.ExecuteNonQuery();
@@ -261,7 +294,7 @@ namespace CultureVulture
             conn = connection;
         }
 
-        public void Load(SQLiteConnection connection, string id)
+        public void Load(SQLiteConnection connection, string recordID)
         {
             //Load record from SQLite table
             
@@ -281,7 +314,7 @@ namespace CultureVulture
             using (var command = connection.CreateCommand())
             {
                 // Create new command
-                command.CommandText = string.Format("SELECT * FROM media WHERE id='{0}';",id);
+                command.CommandText = string.Format("SELECT * FROM media WHERE id='{0}';",recordID);
                 Console.WriteLine(command.CommandText);
                 using (var reader = command.ExecuteReader())
                 {
@@ -294,17 +327,11 @@ namespace CultureVulture
                         creator = (string)reader[3];
                         language = (string)reader[4];
                         date = (string)reader[5];
-						Console.WriteLine(id);
-						Console.WriteLine(media);
-						Console.WriteLine(title);
-						Console.WriteLine(date);
-						Console.WriteLine(reader[6].GetType());
                         rating = (Int32)(Int64)reader[6];
                         edited = (bool)reader[7];
                         goodreadsId = (string)reader[8];
                     }
                 }
-
             }
 
             // Should we close the connection to the database

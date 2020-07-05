@@ -37,6 +37,9 @@ namespace CultureVulture
 		AppKit.NSTableColumn DateColumn { get; set; }
 
 		[Outlet]
+		AppKit.NSTableColumn DeleteColumn { get; set; }
+
+		[Outlet]
 		AppKit.NSButton HardReset { get; set; }
 
 		[Outlet]
@@ -107,9 +110,39 @@ namespace CultureVulture
 				AddMediaTitle = null;
 			}
 
+			if (CreatorColumn != null) {
+				CreatorColumn.Dispose ();
+				CreatorColumn = null;
+			}
+
+			if (DateColumn != null) {
+				DateColumn.Dispose ();
+				DateColumn = null;
+			}
+
 			if (HardReset != null) {
 				HardReset.Dispose ();
 				HardReset = null;
+			}
+
+			if (LanguageColumn != null) {
+				LanguageColumn.Dispose ();
+				LanguageColumn = null;
+			}
+
+			if (MediaColumn != null) {
+				MediaColumn.Dispose ();
+				MediaColumn = null;
+			}
+
+			if (MediaTable != null) {
+				MediaTable.Dispose ();
+				MediaTable = null;
+			}
+
+			if (RatingColumn != null) {
+				RatingColumn.Dispose ();
+				RatingColumn = null;
 			}
 
 			if (SearchMediaField != null) {
@@ -122,44 +155,19 @@ namespace CultureVulture
 				SearchMediaSearch = null;
 			}
 
-			if (UnlockReset != null) {
-				UnlockReset.Dispose ();
-				UnlockReset = null;
-			}
-
-			if (MediaTable != null) {
-				MediaTable.Dispose ();
-				MediaTable = null;
-			}
-
-			if (MediaColumn != null) {
-				MediaColumn.Dispose ();
-				MediaColumn = null;
-			}
-
 			if (TitleColumn != null) {
 				TitleColumn.Dispose ();
 				TitleColumn = null;
 			}
 
-			if (CreatorColumn != null) {
-				CreatorColumn.Dispose ();
-				CreatorColumn = null;
+			if (DeleteColumn != null) {
+				DeleteColumn.Dispose ();
+				DeleteColumn = null;
 			}
 
-			if (LanguageColumn != null) {
-				LanguageColumn.Dispose ();
-				LanguageColumn = null;
-			}
-
-			if (RatingColumn != null) {
-				RatingColumn.Dispose ();
-				RatingColumn = null;
-			}
-
-			if (DateColumn != null) {
-				DateColumn.Dispose ();
-				DateColumn = null;
+			if (UnlockReset != null) {
+				UnlockReset.Dispose ();
+				UnlockReset = null;
 			}
 		}
 	}

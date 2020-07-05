@@ -18,6 +18,11 @@ namespace CultureVulture
             base.ViewDidLoad();
 
             // Do any additional setup after loading the view.
+
+            // Create the Product Table Data Source and populate it
+            var DataSource = new MediaTableDataSource();
+            MediaTable.DataSource = DataSource;
+            MediaTable.Delegate = new MediaTableDelegate(this,DataSource);
         }
 
         public override NSObject RepresentedObject
@@ -31,21 +36,6 @@ namespace CultureVulture
                 base.RepresentedObject = value;
                 // Update the view, if already loaded.
             }
-        }
-
-        public override void AwakeFromNib()
-        {
-            base.AwakeFromNib();
-
-            // Create the Product Table Data Source and populate it
-            var DataSource = new MediaTableDataSource();
-
-            var test = new MediaModel("Book", "XXX", "YYY", "EN", "01-01-20", 5);
-            DataSource.MediaRecords.Add(test);
-
-            // Populate the Product Table
-            MediaTable.DataSource = DataSource;
-            MediaTable.Delegate = new MediaTableDelegate(DataSource);
         }
 
         partial void AddMediaClicked(NSObject sender)
@@ -96,13 +86,16 @@ namespace CultureVulture
                 Record.Load(conn, ID);
                 DataSource.MediaRecords.Add(Record);
 			}
-            Console.WriteLine(DataSource.MediaRecords[0].Media);
             MediaTable.DataSource = DataSource;
-            MediaTable.Delegate = new MediaTableDelegate(DataSource);
+            MediaTable.Delegate = new MediaTableDelegate(this,DataSource);
             MediaTable.ReloadData();
             conn.Close();
         }
 
+        public void ReloadMediaTable()
+        {
+            MediaTable.ReloadData();
+        }
 
         partial void UnlockResetClicked(NSObject sender)
         {
