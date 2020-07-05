@@ -283,8 +283,6 @@ namespace CultureVulture
 						}
 				};
 
-                Console.WriteLine(command.CommandText);
-
                 // Write to database
                 command.ExecuteNonQuery();
             }

@@ -53,13 +53,21 @@ namespace CultureVulture
             var record = new MediaModel(media,title,creator,language,date,rating);
             var conn = GetDatabaseConnection();
             record.Create(conn);
+            SearchMedia(); //refresh search
         }
 
         partial void SearchMediaClicked(NSObject sender)
         {
             //Search database for user query
 
-			//Open database connection 
+            SearchMedia();
+        }
+
+        public void SearchMedia()
+        {
+            //Search database for query
+
+            //Open database connection 
             var conn = GetDatabaseConnection();
             conn.Open();
             var command = conn.CreateCommand();
@@ -67,9 +75,9 @@ namespace CultureVulture
             //Get search string
             string field = SearchMediaField.TitleOfSelectedItem;
             string search = SearchMediaSearch.StringValue;
-            command.CommandText = string.Format("SELECT * FROM media WHERE {0} LIKE '{1}';",field,search);
+            command.CommandText = string.Format("SELECT * FROM media WHERE {0} LIKE '{1}';", field, search);
 
-			//Get IDs of results
+            //Get IDs of results
             SQLiteDataReader reader = command.ExecuteReader();
             List<string> RecordIDs = new List<string>();
             while (reader.Read())
@@ -80,14 +88,14 @@ namespace CultureVulture
 
             //Get media records and update table
             var DataSource = new MediaTableDataSource();
-            foreach(string ID in RecordIDs)
+            foreach (string ID in RecordIDs)
             {
                 var Record = new MediaModel();
                 Record.Load(conn, ID);
                 DataSource.MediaRecords.Add(Record);
-			}
+            }
             MediaTable.DataSource = DataSource;
-            MediaTable.Delegate = new MediaTableDelegate(this,DataSource);
+            MediaTable.Delegate = new MediaTableDelegate(this, DataSource);
             MediaTable.ReloadData();
             conn.Close();
         }

@@ -12,15 +12,10 @@ namespace CultureVulture
     {
         //Based on tutorial: https://docs.microsoft.com/en-us/xamarin/mac/user-interface/table-view
 
-        private const string CellIdentifier = "ProdCell";
+        private const string CellIdentifier = "";
 
         private MediaTableDataSource DataSource;
         private ViewController Controller;
-
-        //public MediaTableDelegate(MediaTableDataSource datasource)
-        //{
-        //    this.DataSource = datasource;
-        //}
 
         public MediaTableDelegate(ViewController controller, MediaTableDataSource datasource)
         {
@@ -48,11 +43,11 @@ namespace CultureVulture
                 switch (view.Identifier)
                 {
                     case "Media":
-                        if (view.TextField.StringValue == "Book" || view.TextField.StringValue == "book")
+                        if (view.TextField.StringValue.ToLower() == "book")
                         {
                             DataSource.MediaRecords[(int)view.TextField.Tag].Media = "Book";
                         }
-                        else if (view.TextField.StringValue == "Film" || view.TextField.StringValue == "film")
+                        else if (view.TextField.StringValue.ToLower() == "film")
                         {
                             DataSource.MediaRecords[(int)view.TextField.Tag].Media = "Film";
                         }
@@ -89,11 +84,9 @@ namespace CultureVulture
 
         public override NSView GetViewForItem(NSTableView tableView, NSTableColumn tableColumn, nint row)
         {
-            // This pattern allows you reuse existing views when they are no-longer in use.
-            // If the returned view is null, you instance up a new view
-            // If a non-null view is returned, you modify it enough to reflect the new data
             NSTableCellView view = (NSTableCellView)tableView.MakeView(tableColumn.Title, this);
-            if (view == null)
+            //if (view == null) //Need to recreate entire table if new books added
+            if (true)
             {
                 view = new NSTableCellView();
 
@@ -146,7 +139,7 @@ namespace CultureVulture
                             var alert = new NSAlert()
                             {
                                 AlertStyle = NSAlertStyle.Informational,
-                                InformativeText = $"Are you sure you want to delete the {record.Media} {record.Title} by {record.Creator}? This operation cannot be undone.",
+                                InformativeText = $"Are you sure you want to delete the {record.Media.ToLower()} {record.Title} by {record.Creator}? This operation cannot be undone.",
                                 MessageText = $"Delete {record.Title}?",
                             };
                             alert.AddButton("Cancel");
@@ -155,9 +148,12 @@ namespace CultureVulture
                                 // Should we delete the requested row?
                                 if (result == 1001)
                                 {
-                                    // Remove the given row from the dataset
+                                    // Delete record from the database and remove the given row from the dataset
+                                    var connection = GetDatabaseConnection();
+                                    DataSource.MediaRecords[(int)btn.Tag].Delete(connection);
                                     DataSource.MediaRecords.RemoveAt((int)btn.Tag);
-                                    Controller.ReloadMediaTable();
+                                    //Controller.ReloadMediaTable();
+                                    Controller.SearchMedia();
                                 }
                             });
                         };
