@@ -186,9 +186,9 @@ namespace CultureVulture
         #endregion
 
         #region SQLite Routines
-        public void Create(SQLiteConnection connection)
+        public void Create(SQLiteConnection connection, bool force=false)
         {
-            //Add record to SQLite table
+            //Add record to SQLite table 
 
             // Clear last connection to prevent circular call to update
             conn = null;
@@ -196,13 +196,18 @@ namespace CultureVulture
             // Update parameters
             id = Guid.NewGuid().ToString();
             edited = true;
-	     
+
+            //Set synctype (whether to overwrite)
+            string clashType;
+            if (force) clashType = "REPLACE";
+            else clashType = "IGNORE";
+
             // Execute query
             connection.Open();
             using (var command = connection.CreateCommand())
             {
                 // Create new command
-                command.CommandText = "INSERT INTO media(id, media, title, creator, language, date, rating, edited, goodreadsId) VALUES(@id, @media, @title, @creator, @language, @date, @rating, @edited, @goodreadsId)";
+                command.CommandText = string.Format("INSERT OR {0} INTO media(id, media, title, creator, language, date, rating, edited, goodreadsId) VALUES(@id, @media, @title, @creator, @language, @date, @rating, @edited, @goodreadsId)",clashType);
 
                 // Populate with data from the record
                 command.Parameters.AddWithValue("@id", id);

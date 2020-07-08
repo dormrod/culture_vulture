@@ -9,9 +9,9 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>CultureVulture</RootNamespace>
     <AssemblyName>CultureVulture</AssemblyName>
+    <MonoMacResourcePrefix>Resources</MonoMacResourcePrefix>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <TargetFrameworkIdentifier>Xamarin.Mac</TargetFrameworkIdentifier>
-    <MonoMacResourcePrefix>Resources</MonoMacResourcePrefix>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -28,6 +28,7 @@
     <IncludeMonoRuntime>false</IncludeMonoRuntime>
     <UseSGen>true</UseSGen>
     <UseRefCounting>true</UseRefCounting>
+    <AOTMode>None</AOTMode>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -42,7 +43,8 @@
     <UseSGen>true</UseSGen>
     <UseRefCounting>true</UseRefCounting>
     <CodeSignEntitlements>Entitlements.plist</CodeSignEntitlements>
-    <LinkMode>SdkOnly</LinkMode>
+    <LinkMode>None</LinkMode>
+    <AOTMode>None</AOTMode>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -50,41 +52,30 @@
     <Reference Include="Xamarin.Mac" />
     <Reference Include="System.Data" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.CodeDom">
-      <HintPath>packages\System.CodeDom.4.7.0\lib\netstandard2.0\System.CodeDom.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Data.SQLite">
-      <HintPath>packages\System.Data.SQLite.Core.1.0.113.1\lib\netstandard2.1\System.Data.SQLite.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Security.Principal.Windows">
-      <HintPath>packages\System.Security.Principal.Windows.4.7.0\lib\netstandard2.0\System.Security.Principal.Windows.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Security.AccessControl">
-      <HintPath>packages\System.Security.AccessControl.4.7.0\lib\netstandard2.0\System.Security.AccessControl.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Security.Permissions">
-      <HintPath>packages\System.Security.Permissions.4.7.0\lib\netstandard2.0\System.Security.Permissions.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Configuration.ConfigurationManager">
-      <HintPath>packages\System.Configuration.ConfigurationManager.4.7.0\lib\netstandard2.0\System.Configuration.ConfigurationManager.dll</HintPath>
-    </Reference>
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Web" />
+    <Reference Include="mscorlib" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Data.OracleClient" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="WindowsBase" />
     <Reference Include="EntityFramework">
       <HintPath>packages\EntityFramework.6.4.4\lib\netstandard2.1\EntityFramework.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework.SqlServer">
       <HintPath>packages\EntityFramework.6.4.4\lib\netstandard2.1\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
-    <Reference Include="System.Data.SQLite.EF6">
-      <HintPath>packages\System.Data.SQLite.EF6.1.0.113.0\lib\netstandard2.1\System.Data.SQLite.EF6.dll</HintPath>
+    <Reference Include="RestSharp">
+      <HintPath>packages\RestSharp.106.11.4\lib\netstandard2.0\RestSharp.dll</HintPath>
     </Reference>
-    <Reference Include="System.Buffers">
-      <HintPath>packages\System.Buffers.4.4.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Runtime.CompilerServices.Unsafe">
-      <HintPath>packages\System.Runtime.CompilerServices.Unsafe.4.5.2\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Memory">
-      <HintPath>packages\System.Memory.4.5.3\lib\netstandard2.0\System.Memory.dll</HintPath>
+    <Reference Include="SQLite.Interop">
+      <HintPath>packages\SQLite.Interop.1.0.0\lib\SQLite.Interop.dll</HintPath>
     </Reference>
     <Reference Include="SQLitePCLRaw.core">
       <HintPath>packages\SQLitePCLRaw.core.2.0.3\lib\netstandard2.0\SQLitePCLRaw.core.dll</HintPath>
@@ -92,8 +83,38 @@
     <Reference Include="SQLitePCLRaw.provider.e_sqlite3">
       <HintPath>packages\SQLitePCLRaw.provider.e_sqlite3.2.0.3\lib\netstandard2.0\SQLitePCLRaw.provider.e_sqlite3.dll</HintPath>
     </Reference>
-    <Reference Include="SQLite.Interop">
-      <HintPath>packages\SQLite.Interop.1.0.0\lib\SQLite.Interop.dll</HintPath>
+    <Reference Include="System.Buffers">
+      <HintPath>packages\System.Buffers.4.5.1\lib\netstandard2.0\System.Buffers.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.CodeDom">
+      <HintPath>packages\System.CodeDom.4.7.0\lib\netstandard2.0\System.CodeDom.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Configuration.ConfigurationManager">
+      <HintPath>packages\System.Configuration.ConfigurationManager.4.7.0\lib\netstandard2.0\System.Configuration.ConfigurationManager.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.SQLite">
+      <HintPath>packages\System.Data.SQLite.Core.1.0.113.1\lib\netstandard2.1\System.Data.SQLite.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.SQLite.EF6">
+      <HintPath>packages\System.Data.SQLite.EF6.1.0.113.0\lib\netstandard2.1\System.Data.SQLite.EF6.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Memory">
+      <HintPath>packages\System.Memory.4.5.4\lib\netstandard2.0\System.Memory.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe">
+      <HintPath>packages\System.Runtime.CompilerServices.Unsafe.4.7.1\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Security.AccessControl">
+      <HintPath>packages\System.Security.AccessControl.4.7.0\lib\netstandard2.0\System.Security.AccessControl.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Permissions">
+      <HintPath>packages\System.Security.Permissions.4.7.0\lib\netstandard2.0\System.Security.Permissions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Principal.Windows">
+      <HintPath>packages\System.Security.Principal.Windows.4.7.0\lib\netstandard2.0\System.Security.Principal.Windows.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -117,6 +138,7 @@
     <None Include="Info.plist" />
     <None Include="Entitlements.plist" />
     <None Include="packages.config" />
+    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
@@ -128,6 +150,8 @@
     <Compile Include="MediaModel.cs" />
     <Compile Include="MediaTableDataSource.cs" />
     <Compile Include="MediaTableDelegate.cs" />
+    <Compile Include="GoodreadsHandler.cs" />
+    <Compile Include="HttpUtility.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Main.storyboard" />

@@ -9,6 +9,9 @@ namespace CultureVulture
 {
     public partial class ViewController : NSViewController
     {
+
+        GoodreadsHandler goodreads;
+
         public ViewController(IntPtr handle) : base(handle)
         {
         }
@@ -23,6 +26,9 @@ namespace CultureVulture
             var DataSource = new MediaTableDataSource();
             MediaTable.DataSource = DataSource;
             MediaTable.Delegate = new MediaTableDelegate(this,DataSource);
+
+            //Set up goodreads api
+            goodreads = new GoodreadsHandler();
         }
 
         public override NSObject RepresentedObject
@@ -129,10 +135,64 @@ namespace CultureVulture
                 command.ExecuteNonQuery();
                 command.CommandText = "CREATE TABLE media(id TEXT PRIMARY KEY, media TEXT, title TEXT, creator TEXT, language TEXT, date TEXT, rating INTEGER, edited BIT, goodreadsId TEXT)";
                 command.ExecuteNonQuery();
+                command.CommandText = "CREATE UNIQUE INDEX mtc on media(media, title, creator);";
+                command.ExecuteNonQuery();
                 conn.Close();
 			}
         }
 
+		partial void GoodreadsAuthClicked(NSObject sender)
+        {
+            //Generate auth link
+            AuthCodeWheel.Hidden = false;
+            AuthCodeWheel.StartAnimation(this);
+			var url = goodreads.GenerateAuthURL();
+            GoodreadsAuthURL.Editable = true;
+            GoodreadsAuthURL.StringValue = url;
+            AuthCodeWheel.StopAnimation(this);
+            AuthCodeWheel.Hidden = true;
+        }
+
+        partial void GoodreadsVerifyClicked(NSObject sender)
+        {
+            //Check auth successful
+
+            var verified = goodreads.VerifyAuth();
+            if(verified)
+            {
+                GoodreadsLoginName.StringValue = string.Format("Welcome {0}", goodreads.UserName);
+                //GoodreadsVerify.State = NSCellStateValue.On;
+            }
+            else
+            {
+                //             GoodreadsVerify.State = NSCellStateValue.Off;
+                GoodreadsLoginName.StringValue = string.Format("Could not log in");
+            }
+        }
+
+        partial void GoodreadsSyncClicked(NSObject sender)
+        {
+            //Sync with account
+
+            SyncBar.DoubleValue = 0;
+            string syncType = GoodreadsSyncType.TitleOfSelectedItem;
+            bool force;
+            if (ForceSyncOption.State.ToString() == "On") force = true;
+            else force = false;
+            if (syncType == "Pull") {
+                var PulledBooks = goodreads.Pull(SyncBar);
+				SyncBar.DoubleValue = 60;
+                var conn = GetDatabaseConnection();
+                int counter = 1;
+                foreach(MediaModel Book in PulledBooks)
+                {
+                    Book.Create(conn,force);
+                    SyncBar.DoubleValue = 60 + 40 * counter / PulledBooks.Count;
+				}
+			}
+            SearchMedia();
+			SyncBar.DoubleValue = 0;
+        }
 
         private SQLiteConnection GetDatabaseConnection()
         {

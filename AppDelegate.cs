@@ -79,6 +79,8 @@ namespace CultureVulture
                 var command = conn.CreateCommand();
                 command.CommandText = commandText;
                 command.ExecuteNonQuery();
+                command.CommandText = "CREATE UNIQUE INDEX mtc on media(media, title, creator);";
+                command.ExecuteNonQuery();
                 conn.Close();
             }
 

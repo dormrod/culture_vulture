@@ -31,6 +31,9 @@ namespace CultureVulture
 		AppKit.NSTextField AddMediaTitle { get; set; }
 
 		[Outlet]
+		AppKit.NSProgressIndicator AuthCodeWheel { get; set; }
+
+		[Outlet]
 		AppKit.NSTableColumn CreatorColumn { get; set; }
 
 		[Outlet]
@@ -38,6 +41,21 @@ namespace CultureVulture
 
 		[Outlet]
 		AppKit.NSTableColumn DeleteColumn { get; set; }
+
+		[Outlet]
+		AppKit.NSButton ForceSyncOption { get; set; }
+
+		[Outlet]
+		AppKit.NSTextField GoodreadsAuthURL { get; set; }
+
+		[Outlet]
+		AppKit.NSTextField GoodreadsLoginName { get; set; }
+
+		[Outlet]
+		AppKit.NSPopUpButton GoodreadsSyncType { get; set; }
+
+		[Outlet]
+		AppKit.NSButton GoodreadsVerify { get; set; }
 
 		[Outlet]
 		AppKit.NSButton HardReset { get; set; }
@@ -61,6 +79,9 @@ namespace CultureVulture
 		AppKit.NSSearchField SearchMediaSearch { get; set; }
 
 		[Outlet]
+		AppKit.NSProgressIndicator SyncBar { get; set; }
+
+		[Outlet]
 		AppKit.NSTableColumn TitleColumn { get; set; }
 
 		[Outlet]
@@ -68,6 +89,15 @@ namespace CultureVulture
 
 		[Action ("AddMediaClicked:")]
 		partial void AddMediaClicked (Foundation.NSObject sender);
+
+		[Action ("GoodreadsAuthClicked:")]
+		partial void GoodreadsAuthClicked (Foundation.NSObject sender);
+
+		[Action ("GoodreadsSyncClicked:")]
+		partial void GoodreadsSyncClicked (Foundation.NSObject sender);
+
+		[Action ("GoodreadsVerifyClicked:")]
+		partial void GoodreadsVerifyClicked (Foundation.NSObject sender);
 
 		[Action ("HardResetClicked:")]
 		partial void HardResetClicked (Foundation.NSObject sender);
@@ -80,6 +110,11 @@ namespace CultureVulture
 		
 		void ReleaseDesignerOutlets ()
 		{
+			if (ForceSyncOption != null) {
+				ForceSyncOption.Dispose ();
+				ForceSyncOption = null;
+			}
+
 			if (AddMediaCreator != null) {
 				AddMediaCreator.Dispose ();
 				AddMediaCreator = null;
@@ -110,6 +145,11 @@ namespace CultureVulture
 				AddMediaTitle = null;
 			}
 
+			if (AuthCodeWheel != null) {
+				AuthCodeWheel.Dispose ();
+				AuthCodeWheel = null;
+			}
+
 			if (CreatorColumn != null) {
 				CreatorColumn.Dispose ();
 				CreatorColumn = null;
@@ -118,6 +158,31 @@ namespace CultureVulture
 			if (DateColumn != null) {
 				DateColumn.Dispose ();
 				DateColumn = null;
+			}
+
+			if (DeleteColumn != null) {
+				DeleteColumn.Dispose ();
+				DeleteColumn = null;
+			}
+
+			if (GoodreadsAuthURL != null) {
+				GoodreadsAuthURL.Dispose ();
+				GoodreadsAuthURL = null;
+			}
+
+			if (GoodreadsLoginName != null) {
+				GoodreadsLoginName.Dispose ();
+				GoodreadsLoginName = null;
+			}
+
+			if (GoodreadsSyncType != null) {
+				GoodreadsSyncType.Dispose ();
+				GoodreadsSyncType = null;
+			}
+
+			if (GoodreadsVerify != null) {
+				GoodreadsVerify.Dispose ();
+				GoodreadsVerify = null;
 			}
 
 			if (HardReset != null) {
@@ -155,14 +220,14 @@ namespace CultureVulture
 				SearchMediaSearch = null;
 			}
 
+			if (SyncBar != null) {
+				SyncBar.Dispose ();
+				SyncBar = null;
+			}
+
 			if (TitleColumn != null) {
 				TitleColumn.Dispose ();
 				TitleColumn = null;
-			}
-
-			if (DeleteColumn != null) {
-				DeleteColumn.Dispose ();
-				DeleteColumn = null;
 			}
 
 			if (UnlockReset != null) {
