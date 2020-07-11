@@ -13,6 +13,9 @@ namespace CultureVulture
 	partial class ViewController
 	{
 		[Outlet]
+		AppKit.NSPopUpButton AddMediaCompletion { get; set; }
+
+		[Outlet]
 		AppKit.NSTextField AddMediaCreator { get; set; }
 
 		[Outlet]
@@ -29,9 +32,6 @@ namespace CultureVulture
 
 		[Outlet]
 		AppKit.NSTextField AddMediaTitle { get; set; }
-
-		[Outlet]
-		AppKit.NSProgressIndicator AuthCodeWheel { get; set; }
 
 		[Outlet]
 		AppKit.NSTableColumn CreatorColumn { get; set; }
@@ -79,7 +79,7 @@ namespace CultureVulture
 		AppKit.NSSearchField SearchMediaSearch { get; set; }
 
 		[Outlet]
-		AppKit.NSProgressIndicator SyncBar { get; set; }
+		AppKit.NSTableColumn StatusColumn { get; set; }
 
 		[Outlet]
 		AppKit.NSTableColumn TitleColumn { get; set; }
@@ -110,9 +110,9 @@ namespace CultureVulture
 		
 		void ReleaseDesignerOutlets ()
 		{
-			if (ForceSyncOption != null) {
-				ForceSyncOption.Dispose ();
-				ForceSyncOption = null;
+			if (AddMediaCompletion != null) {
+				AddMediaCompletion.Dispose ();
+				AddMediaCompletion = null;
 			}
 
 			if (AddMediaCreator != null) {
@@ -145,11 +145,6 @@ namespace CultureVulture
 				AddMediaTitle = null;
 			}
 
-			if (AuthCodeWheel != null) {
-				AuthCodeWheel.Dispose ();
-				AuthCodeWheel = null;
-			}
-
 			if (CreatorColumn != null) {
 				CreatorColumn.Dispose ();
 				CreatorColumn = null;
@@ -160,9 +155,19 @@ namespace CultureVulture
 				DateColumn = null;
 			}
 
+			if (StatusColumn != null) {
+				StatusColumn.Dispose ();
+				StatusColumn = null;
+			}
+
 			if (DeleteColumn != null) {
 				DeleteColumn.Dispose ();
 				DeleteColumn = null;
+			}
+
+			if (ForceSyncOption != null) {
+				ForceSyncOption.Dispose ();
+				ForceSyncOption = null;
 			}
 
 			if (GoodreadsAuthURL != null) {
@@ -218,11 +223,6 @@ namespace CultureVulture
 			if (SearchMediaSearch != null) {
 				SearchMediaSearch.Dispose ();
 				SearchMediaSearch = null;
-			}
-
-			if (SyncBar != null) {
-				SyncBar.Dispose ();
-				SyncBar = null;
 			}
 
 			if (TitleColumn != null) {

@@ -22,7 +22,9 @@ namespace CultureVulture
         private string language;
         private string date;
         private int rating;
-        private string goodreadsId;
+        private string status;
+        private string goodreadsBookId;
+        private string goodreadsReviewId;
         private bool edited;
 		private SQLiteConnection conn = null;
         #endregion
@@ -124,20 +126,46 @@ namespace CultureVulture
             }
         }
 		
-		[Export("GoodreadsID")]
+		[Export("GoodreadsBookID")]
         public string GoodreadsID
         {
-            get { return goodreadsId; }
+            get { return goodreadsBookId; }
             set
             {
                 WillChangeValue("GoodreadsID");
-                goodreadsId = value;
+                goodreadsBookId = value;
                 DidChangeValue("GoodreadsID");
-                if (conn != null) Update(conn,"goodreadsId");
+                if (conn != null) Update(conn,"goodreadsBookId");
             }
         }
 		
-		[Export("Edited")]
+		[Export("GoodreadsReviewID")]
+        public string GoodreadsReviewID
+        {
+            get { return goodreadsReviewId; }
+            set
+            {
+                WillChangeValue("GoodreadsID");
+                goodreadsReviewId = value;
+                DidChangeValue("GoodreadsID");
+                if (conn != null) Update(conn,"goodreadsReviewId");
+            }
+        }
+
+        [Export("Status")]
+        public string Status
+        {
+            get { return status; }
+            set
+            {
+                WillChangeValue("Status");
+                status = value;
+                DidChangeValue("Status");
+                if (conn != null) Update(conn, "status");
+            }
+        }
+
+        [Export("Edited")]
         public bool Edited
         {
             get { return edited; }
@@ -154,7 +182,7 @@ namespace CultureVulture
         #region Constructors
         public MediaModel(){}
         
-		public MediaModel(string mediaIn, string titleIn, string creatorIn, string languageIn, string dateIn, int ratingIn)
+		public MediaModel(string mediaIn, string titleIn, string creatorIn, string languageIn, string dateIn, int ratingIn, string statusIn)
         {
             //Initialise
             media = mediaIn;
@@ -163,10 +191,13 @@ namespace CultureVulture
             language = languageIn;
             date = dateIn;
             rating = ratingIn;
-            goodreadsId = "X";
+            edited = false;
+            status = statusIn;
+            goodreadsBookId = "X";
+            goodreadsReviewId = "X";
 		}
 
-        public MediaModel(string mediaIn, string titleIn, string creatorIn, string languageIn, string dateIn, int ratingIn, string goodreadsIdIn)
+        public MediaModel(string mediaIn, string titleIn, string creatorIn, string languageIn, string dateIn, int ratingIn, string statusIn, string goodreadsBookIdIn, string goodreadsReviewIdIn)
         {
             //Initialise
             media = mediaIn;
@@ -175,7 +206,10 @@ namespace CultureVulture
             language = languageIn;
             date = dateIn;
             rating = ratingIn;
-            goodreadsId = goodreadsIdIn;
+            edited = false;
+            status = statusIn;
+            goodreadsBookId = goodreadsBookIdIn;
+            goodreadsReviewId = goodreadsReviewIdIn;
 		}
 
         public MediaModel(SQLiteConnection conn, string id)
@@ -195,7 +229,6 @@ namespace CultureVulture
 
             // Update parameters
             id = Guid.NewGuid().ToString();
-            edited = true;
 
             //Set synctype (whether to overwrite)
             string clashType;
@@ -207,7 +240,7 @@ namespace CultureVulture
             using (var command = connection.CreateCommand())
             {
                 // Create new command
-                command.CommandText = string.Format("INSERT OR {0} INTO media(id, media, title, creator, language, date, rating, edited, goodreadsId) VALUES(@id, @media, @title, @creator, @language, @date, @rating, @edited, @goodreadsId)",clashType);
+                command.CommandText = string.Format("INSERT OR {0} INTO media(id, media, title, creator, language, date, rating, status, edited, goodreadsBookId, goodreadsReviewId) VALUES(@id, @media, @title, @creator, @language, @date, @rating, @status, @edited, @goodreadsBookId, @goodreadsReviewId)", clashType);
 
                 // Populate with data from the record
                 command.Parameters.AddWithValue("@id", id);
@@ -217,8 +250,10 @@ namespace CultureVulture
                 command.Parameters.AddWithValue("@language", language);
                 command.Parameters.AddWithValue("@date", date);
                 command.Parameters.AddWithValue("@rating", rating);
+                command.Parameters.AddWithValue("@status", status);
                 command.Parameters.AddWithValue("@edited", edited);
-                command.Parameters.AddWithValue("@goodreadsId", goodreadsId);
+                command.Parameters.AddWithValue("@goodreadsBookId", goodreadsBookId);
+                command.Parameters.AddWithValue("@goodreadsReviewId", goodreadsReviewId);
 
                 // Write to database
                 command.ExecuteNonQuery();
@@ -235,12 +270,21 @@ namespace CultureVulture
 
             // Clear last connection to prevent circular call to update
             conn = null;
-            
-			//Update parameters
-			edited = true;
-            
+
+            //Update parameters
+            if (field == "edited") edited = false;
+            else edited = true;
+
             // Execute query
             connection.Open();
+   //         try
+   //         { 
+			//	connection.Open();
+			//}
+   //         catch
+   //         {
+               
+			//}
             using (var command = connection.CreateCommand())
             {
                 // Create new command
@@ -271,9 +315,19 @@ namespace CultureVulture
 							command.CommandText = string.Format("UPDATE media SET {0}='{1}' WHERE id='{2}'",field,date,id);
                             break; 
 						}
-                    case ("goodreadsId"):
+                    case ("status"):
                         {
-							command.CommandText = string.Format("UPDATE media SET {0}='{1}' WHERE id='{2}'",field,goodreadsId,id);
+							command.CommandText = string.Format("UPDATE media SET {0}='{1}' WHERE id='{2}'",field,status,id);
+                            break; 
+						}
+                    case ("goodreadsBookId"):
+                        {
+							command.CommandText = string.Format("UPDATE media SET {0}='{1}' WHERE id='{2}'",field,goodreadsBookId,id);
+                            break; 
+						}
+                    case ("goodreadsReviewId"):
+                        {
+							command.CommandText = string.Format("UPDATE media SET {0}='{1}' WHERE id='{2}'",field,goodreadsReviewId,id);
                             break; 
 						}
                     case ("rating"):
@@ -306,12 +360,12 @@ namespace CultureVulture
             // Clear last connection to prevent circular call to update
             conn = null;
 
-            // Check if database already open
-            //if (connection.State != ConnectionState.Open)
-            //{
-            //    shouldClose = true;
-            //    connection.Open();
-            //}
+            //Check if database already open
+            if (connection.State != ConnectionState.Open)
+            {
+                shouldClose = true;
+                connection.Open();
+            }
 
             // Execute query
             using (var command = connection.CreateCommand())
@@ -331,8 +385,10 @@ namespace CultureVulture
                         language = (string)reader[4];
                         date = (string)reader[5];
                         rating = (Int32)(Int64)reader[6];
-                        edited = (bool)reader[7];
-                        goodreadsId = (string)reader[8];
+                        status = (string)reader[7];
+                        edited = (bool)reader[8];
+                        goodreadsBookId = (string)reader[9];
+                        goodreadsBookId = (string)reader[10];
                     }
                 }
             }

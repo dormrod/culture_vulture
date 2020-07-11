@@ -74,6 +74,20 @@ namespace CultureVulture
                     case "Date":
                         DataSource.MediaRecords[(int)view.TextField.Tag].Date = view.TextField.StringValue;
                         break;
+                    case "Completion":
+                        if (view.TextField.StringValue.ToLower() == "completed")
+                        {
+                            DataSource.MediaRecords[(int)view.TextField.Tag].Status = "Completed";
+                        }
+                        else if (view.TextField.StringValue.ToLower() == "in progress")
+                        {
+                            DataSource.MediaRecords[(int)view.TextField.Tag].Status = "In Progress";
+                        }
+                        else if (view.TextField.StringValue.ToLower() == "wish list")
+                        {
+                            DataSource.MediaRecords[(int)view.TextField.Tag].Status = "Wish List";
+                        }
+                        break;
                 }
                 Controller.ReloadMediaTable();
             };
@@ -119,6 +133,10 @@ namespace CultureVulture
                         ConfigureTextField(view, row);
                         break;
                     case "Date":
+                        view.TextField = new NSTextField(new CGRect(0, 0, 400, 16));
+                        ConfigureTextField(view, row);
+                        break;
+                    case "Completion":
                         view.TextField = new NSTextField(new CGRect(0, 0, 400, 16));
                         ConfigureTextField(view, row);
                         break;
@@ -179,10 +197,15 @@ namespace CultureVulture
                     view.TextField.StringValue = DataSource.MediaRecords[(int)row].Language;
                     break;
                 case "Rating":
-                    view.TextField.StringValue = DataSource.MediaRecords[(int)row].Rating.ToString();
+                    int rating = DataSource.MediaRecords[(int)row].Rating;
+                    if (rating == 0) view.TextField.StringValue = "";
+                    else view.TextField.StringValue = rating.ToString();
                     break;
                 case "Date":
                     view.TextField.StringValue = DataSource.MediaRecords[(int)row].Date;
+                    break;
+                case "Completion":
+                    view.TextField.StringValue = DataSource.MediaRecords[(int)row].Status;
                     break;
                 case "Delete":
                     foreach (NSView subview in view.Subviews)

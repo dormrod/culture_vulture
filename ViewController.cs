@@ -56,7 +56,9 @@ namespace CultureVulture
             int rating = AddMediaRating.IntValue;
             var dateTime = DateTime.Parse(AddMediaDate.DateValue.ToString());
             string date = dateTime.ToString("dd-MM-yyyy");
-            var record = new MediaModel(media,title,creator,language,date,rating);
+            string completion = AddMediaCompletion.TitleOfSelectedItem;
+            var record = new MediaModel(media,title,creator,language,date,rating,completion);
+            record.Edited = true;
             var conn = GetDatabaseConnection();
             record.Create(conn);
             SearchMedia(); //refresh search
@@ -91,6 +93,7 @@ namespace CultureVulture
                 string ID = reader.GetString(0);
                 RecordIDs.Add(ID);
             }
+            conn.Close();
 
             //Get media records and update table
             var DataSource = new MediaTableDataSource();
@@ -103,7 +106,6 @@ namespace CultureVulture
             MediaTable.DataSource = DataSource;
             MediaTable.Delegate = new MediaTableDelegate(this, DataSource);
             MediaTable.ReloadData();
-            conn.Close();
         }
 
         public void ReloadMediaTable()
@@ -133,7 +135,7 @@ namespace CultureVulture
 				var command = conn.CreateCommand();
                 command.CommandText = "DROP TABLE IF EXISTS media;";
                 command.ExecuteNonQuery();
-                command.CommandText = "CREATE TABLE media(id TEXT PRIMARY KEY, media TEXT, title TEXT, creator TEXT, language TEXT, date TEXT, rating INTEGER, edited BIT, goodreadsId TEXT)";
+                command.CommandText = "CREATE TABLE media(id TEXT PRIMARY KEY, media TEXT, title TEXT, creator TEXT, language TEXT, date TEXT, rating INTEGER, status TEXT, edited BIT, goodreadsBookId TEXT, goodreadsReviewId TEXT)";
                 command.ExecuteNonQuery();
                 command.CommandText = "CREATE UNIQUE INDEX mtc on media(media, title, creator);";
                 command.ExecuteNonQuery();
@@ -144,13 +146,9 @@ namespace CultureVulture
 		partial void GoodreadsAuthClicked(NSObject sender)
         {
             //Generate auth link
-            AuthCodeWheel.Hidden = false;
-            AuthCodeWheel.StartAnimation(this);
 			var url = goodreads.GenerateAuthURL();
             GoodreadsAuthURL.Editable = true;
             GoodreadsAuthURL.StringValue = url;
-            AuthCodeWheel.StopAnimation(this);
-            AuthCodeWheel.Hidden = true;
         }
 
         partial void GoodreadsVerifyClicked(NSObject sender)
@@ -161,11 +159,9 @@ namespace CultureVulture
             if(verified)
             {
                 GoodreadsLoginName.StringValue = string.Format("Welcome {0}", goodreads.UserName);
-                //GoodreadsVerify.State = NSCellStateValue.On;
             }
             else
             {
-                //             GoodreadsVerify.State = NSCellStateValue.Off;
                 GoodreadsLoginName.StringValue = string.Format("Could not log in");
             }
         }
@@ -174,24 +170,72 @@ namespace CultureVulture
         {
             //Sync with account
 
-            SyncBar.DoubleValue = 0;
             string syncType = GoodreadsSyncType.TitleOfSelectedItem;
             bool force;
+            var conn = GetDatabaseConnection();
             if (ForceSyncOption.State.ToString() == "On") force = true;
             else force = false;
-            if (syncType == "Pull") {
-                var PulledBooks = goodreads.Pull(SyncBar);
-				SyncBar.DoubleValue = 60;
-                var conn = GetDatabaseConnection();
-                int counter = 1;
-                foreach(MediaModel Book in PulledBooks)
+            if (syncType == "Pull") 
+			{
+                //Pull completed books
+                var pulledBooks = goodreads.Pull("read");
+                foreach(MediaModel Book in pulledBooks)
                 {
                     Book.Create(conn,force);
-                    SyncBar.DoubleValue = 60 + 40 * counter / PulledBooks.Count;
+				}
+               
+                //Pull in progress books 
+				pulledBooks = goodreads.Pull("currently-reading");
+                foreach(MediaModel Book in pulledBooks)
+                {
+                    Book.Create(conn,force);
+				}
+                
+				//Pull wish list books 
+				pulledBooks = goodreads.Pull("to-read");
+                foreach(MediaModel Book in pulledBooks)
+                {
+                    Book.Create(conn,force);
 				}
 			}
+            else
+            {
+                //Push edited books to goodreads
+                var editedBookIDs = new List<string>();
+                var editedBooks = new List<MediaModel>();
+                
+				//Get IDs of edited books
+                var command = conn.CreateCommand();
+                command.CommandText = string.Format("SELECT * FROM media WHERE media='Book' AND edited=1;");
+                conn.Open();
+                SQLiteDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    string ID = reader.GetString(0);
+                    editedBookIDs.Add(ID);
+                }
+                conn.Close();
+
+                //Get edited media 
+                foreach (string ID in editedBookIDs)
+                {
+                    var book = new MediaModel();
+                    book.Load(conn, ID);
+                    editedBooks.Add(book);
+                }
+
+				//Push media
+                foreach (MediaModel book in editedBooks)
+                {
+                    //Add media without goodreads id
+                    if(book.GoodreadsID=="X")
+                    {
+                        var id = goodreads.PushNew(book);
+                        book.GoodreadsID = id;
+					}
+				}                    
+            }
             SearchMedia();
-			SyncBar.DoubleValue = 0;
         }
 
         private SQLiteConnection GetDatabaseConnection()

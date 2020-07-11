@@ -42,6 +42,7 @@ namespace CultureVulture
         {
 
 			//Get OAuth tokens
+            Client.Authenticator = OAuth1Authenticator.ForRequestToken(DeveloperKey, DeveloperSecret);
             var oauthRequestToken = new RestRequest("oauth/request_token");
             var response = Client.Execute(oauthRequestToken);
             var qs = HttpUtility.ParseQueryString(response.Content);
@@ -87,27 +88,25 @@ namespace CultureVulture
             return true;
         }
 
-        public List<MediaModel> Pull(NSProgressIndicator Progress)
+        public List<MediaModel> Pull(string shelf)
         {
             //Get all user books from goodreads account
 
             //Loop through record pages and extract books
             var books = new List<MediaModel>();
-            int page = 1,counter=1,counterMax;
+            int page = 1;
             string endRecord, totalRecord;
             do
             {
-				Progress.DoubleValue = 10;
                 var request = new RestRequest(string.Format("review/list/{0}.xml", UserID), DataFormat.Xml);
                 request.AddParameter("v", 2);
                 request.AddParameter("id", UserID);
-                request.AddParameter("shelf", "read");
+                request.AddParameter("shelf", shelf);
                 request.AddParameter("page", page);
                 request.AddParameter("per_page", 200);
                 request.AddParameter("key", DeveloperKey);
                 var response = ExecuteGetRequest<ShelfResponse>(request);
-                counterMax = Convert.ToInt32(response.Data.reviews.end);
-
+                Console.WriteLine(response.Content);
                 foreach (Review review in response.Data.reviews.reviews)
                 {
 
@@ -127,18 +126,21 @@ namespace CultureVulture
                             if (i < 20 || i > 25) dateTmp += review.readAt[i];
                         }
                         DateTime dt = DateTime.ParseExact(dateTmp, "ddd MMM dd HH:mm:ss yyyy", CultureInfo.InvariantCulture);
-                        BookDate = dt.ToString("yyyy-MM-dd");
+                        BookDate = dt.ToString("dd-MM-yyyy");
                     }
                     catch
                     {
                         BookDate = "";
                     }
-                    string GoodreadsID = review.book.id;
+                    string GoodreadsBookID = review.book.id;
+                    string GoodreadsReviewID = review.id;
+                    string BookStatus="";
+                    if (shelf == "read") BookStatus = "Completed";
+                    else if (shelf == "currently-reading") BookStatus = "In Progress";
+                    else if (shelf == "to-read") BookStatus = "Wish List";
 
-                    var book = new MediaModel("Book",BookTitle,BookAuthor,"",BookDate,BookRating,GoodreadsID);
+                    var book = new MediaModel("Book",BookTitle,BookAuthor,"",BookDate,BookRating,BookStatus,GoodreadsBookID,GoodreadsReviewID);
                     books.Add(book);
-                    Progress.DoubleValue = 10 + 40 * counter / counterMax;
-                    ++counter;
                 }
                 endRecord = response.Data.reviews.end;
                 totalRecord = response.Data.reviews.end;
@@ -148,12 +150,55 @@ namespace CultureVulture
             return books;
         }
 
+        public string PushNew(MediaModel book)
+        {
+            //Push new book to goodreads and return ID to update local record
+			
+            //Search goodreads for book id and take top one
+            var request = new RestRequest("search/index.xml", DataFormat.Xml);
+            request.AddParameter("q", string.Format("{0} {1}", book.Creator, book.Title));
+            request.AddParameter("page", 1);
+            request.AddParameter("key", DeveloperKey);
+            request.XmlSerializer = new RestSharp.Serializers.DotNetXmlSerializer();
+            var response = Client.Execute<CatalogueSearch>(request);
+            var deserialiser = new CustomXmlDeserialiser(); //Use custom deserialiser to handle non-escapted characters
+            CatalogueSearch data = deserialiser.DeserializeRegEx<CatalogueSearch>(response);
+            var id = data.search.results.work[0].bestBook.id;
+
+            //Add book
+            var postRequest = new RestRequest("review.xml", Method.POST);
+            postRequest.AddParameter("book_id", id);
+            if (book.Rating != 0) postRequest.AddParameter("review[rating]", book.Rating);
+            if (book.Date != "") postRequest.AddParameter("review[read_at]", book.Date);
+            postRequest.AddParameter("shelf", "read");
+            var postResponse = Client.Execute(postRequest);
+            Console.WriteLine(postResponse.Content,postResponse.StatusCode);
+            return id;
+        }
 
         public IRestResponse<T> ExecuteGetRequest<T>(RestRequest request)
         {
             request.XmlSerializer = new RestSharp.Serializers.DotNetXmlSerializer();
             var response = Client.Execute<T>(request);
             return response;
+        }
+    }
+
+    //#### CUSTOM DESEREALISER AS TO REMOVE ESCAPE CHARACTERS ####
+    class CustomXmlDeserialiser : DotNetXmlDeserializer
+    {
+        public T DeserializeRegEx<T>(IRestResponse response)
+        {
+            string pattern = @"&#x((10?|[2-F])FFF[EF]|FDD[0-9A-F]|7F|8[0-46-9A-F]9[0-9A-F])"; // XML 1.0
+            //string pattern = @"#x((10?|[2-F])FFF[EF]|FDD[0-9A-F]|[19][0-9A-F]|7F|8[0-46-9A-F]|0?[1-8BCEF])"; // XML 1.1
+            System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(pattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            if (regex.IsMatch(response.Content))
+            {
+                response.Content = regex.Replace(response.Content, String.Empty);
+            }
+            response.Content = response.Content.Replace("&;", string.Empty);
+
+            return base.Deserialize<T>(response);
         }
     }
 
@@ -195,6 +240,8 @@ namespace CultureVulture
 
     public class Review
     {
+        [XmlElement]
+        public string id { get; set; }
         [XmlElement("book")]
         public ReviewBook book { get; set; }
         [XmlElement("rating")]
@@ -217,6 +264,38 @@ namespace CultureVulture
     {
         [XmlElement("author")]
         public string name { get; set; }
+    }
+
+    //#### SEARCH XML DESEREALISATION ####
+    [XmlRoot("GoodreadsResponse")]
+    public class CatalogueSearch
+    {
+        [XmlElement("search")]
+        public SearchBook search { get; set; }
+    }
+
+    public class SearchBook
+    {
+        [XmlElement("results")]
+        public SearchResults results { get; set; }
+    }
+
+    public class SearchResults
+    {
+        [XmlElement("work")]
+        public List<SearchWork> work { get; set; }
+    }
+
+    public class SearchWork
+    {
+        [XmlElement("best_book")]
+        public SearchBookMatch bestBook { get; set; }
+    }
+
+    public class SearchBookMatch
+    {
+        [XmlElement("id")]
+        public string id { get; set; }
     }
 
 

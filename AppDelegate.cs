@@ -73,7 +73,7 @@ namespace CultureVulture
             // Set the structure of the database
             if (!exists)
             {
-                string commandText = "CREATE TABLE media(id TEXT PRIMARY KEY, media TEXT, title TEXT, creator TEXT, language TEXT, date TEXT, rating INTEGER, edited BIT, goodreadsId TEXT)";
+                string commandText = "CREATE TABLE media(id TEXT PRIMARY KEY, media TEXT, title TEXT, creator TEXT, language TEXT, date TEXT, rating INTEGER, status TEXT, edited BIT, goodreadsBookId TEXT, goodreadsReviewId TEXT)";
 		    
                 conn.Open();
                 var command = conn.CreateCommand();
