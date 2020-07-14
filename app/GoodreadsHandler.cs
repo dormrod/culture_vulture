@@ -33,7 +33,7 @@ namespace CultureVulture
 
             //##### Developer keys and secret here #####
             DeveloperKey = "XXXXXX"; 
-            DeveloperSecret = "XXXXXX"; 
+            DeveloperSecret = "XXXXXX";
             Client.Authenticator = OAuth1Authenticator.ForRequestToken(DeveloperKey, DeveloperSecret);
         }
 
