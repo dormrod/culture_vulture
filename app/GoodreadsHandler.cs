@@ -30,11 +30,10 @@ namespace CultureVulture
         public GoodreadsHandler()
         {
             //Construct loading developer keys
-            //Get developer keys and secret
-            //DeveloperKey = Environment.GetEnvironmentVariable("goodreads_key");
-            //DeveloperSecret = Environment.GetEnvironmentVariable("goodreads_secret");
-			DeveloperKey = "FZCOErQOPJ5lfAzWOUNUA";
-			DeveloperSecret = "naiIe3c4Kcf7wqYENsM27kkrxDjOKxJxgocUzGueJo";
+
+            //##### Developer keys and secret here #####
+            DeveloperKey = "XXXXXX"; 
+            DeveloperSecret = "XXXXXX"; 
             Client.Authenticator = OAuth1Authenticator.ForRequestToken(DeveloperKey, DeveloperSecret);
         }
 
