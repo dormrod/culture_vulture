@@ -14,7 +14,8 @@ namespace CultureVulture
 {
     public class GoodreadsHandler
     {
-
+		
+        //Client and API Keys
         private RestClient Client = new RestClient("https://www.goodreads.com/");
         private string DeveloperKey;
 		private string DeveloperSecret;
@@ -28,18 +29,18 @@ namespace CultureVulture
 
         public GoodreadsHandler()
         {
+            //Construct loading developer keys
             //Get developer keys and secret
             //DeveloperKey = Environment.GetEnvironmentVariable("goodreads_key");
             //DeveloperSecret = Environment.GetEnvironmentVariable("goodreads_secret");
 			DeveloperKey = "FZCOErQOPJ5lfAzWOUNUA";
 			DeveloperSecret = "naiIe3c4Kcf7wqYENsM27kkrxDjOKxJxgocUzGueJo";
-            Console.WriteLine(DeveloperKey);
-            Console.WriteLine(DeveloperSecret);
             Client.Authenticator = OAuth1Authenticator.ForRequestToken(DeveloperKey, DeveloperSecret);
         }
 
         public string GenerateAuthURL()
         {
+            //Generate URL for OAuth1 flow
 
 			//Get OAuth tokens
             Client.Authenticator = OAuth1Authenticator.ForRequestToken(DeveloperKey, DeveloperSecret);
@@ -96,8 +97,11 @@ namespace CultureVulture
             var books = new List<MediaModel>();
             int page = 1;
             string endRecord, totalRecord;
+
+            //Loop until pagination complete
             do
             {
+                //Get list of user reviwers
                 var request = new RestRequest(string.Format("review/list/{0}.xml", UserID), DataFormat.Xml);
                 request.AddParameter("v", 2);
                 request.AddParameter("id", UserID);
@@ -106,17 +110,19 @@ namespace CultureVulture
                 request.AddParameter("per_page", 200);
                 request.AddParameter("key", DeveloperKey);
                 var response = ExecuteGetRequest<ShelfResponse>(request);
-                //Console.WriteLine(response.Content);
-                foreach (Review review in response.Data.reviews.reviews)
+                
+                //Loop over each review and convert to media
+				foreach (Review review in response.Data.reviews.reviews)
                 {
 
-                    string BookTitle = review.book.titleWithoutSeries;
-                    int BookRating = review.rating;
-                    string BookAuthor = "";
-                    string BookDate = "";
+                    //Extract book information
+                    string bookTitle = review.book.titleWithoutSeries;
+                    int bookRating = review.rating;
+                    string bookAuthor = "";
+                    string bookDate = "";
                     foreach (ReviewAuthor reviewAuthor in review.book.authors)
                     {
-                        BookAuthor += reviewAuthor.name;
+                        bookAuthor += reviewAuthor.name;
                     }
                     try
                     {
@@ -126,11 +132,11 @@ namespace CultureVulture
                             if (i < 20 || i > 25) dateTmp += review.readAt[i];
                         }
                         DateTime dt = DateTime.ParseExact(dateTmp, "ddd MMM dd HH:mm:ss yyyy", CultureInfo.InvariantCulture);
-                        BookDate = dt.ToString("dd-MM-yyyy");
+                        bookDate = dt.ToString("dd-MM-yyyy");
                     }
                     catch
                     {
-                        BookDate = "";
+                        bookDate = "";
                     }
                     string GoodreadsBookID = review.book.id;
                     string GoodreadsReviewID = review.id;
@@ -139,7 +145,7 @@ namespace CultureVulture
                     else if (shelf == "currently-reading") BookStatus = "In Progress";
                     else if (shelf == "to-read") BookStatus = "Wish List";
 
-                    var book = new MediaModel("Book",BookTitle,BookAuthor,"",BookDate,BookRating,BookStatus,GoodreadsBookID,GoodreadsReviewID);
+                    var book = new MediaModel("Book",bookTitle,bookAuthor,"",bookDate,bookRating,BookStatus,GoodreadsBookID,GoodreadsReviewID);
                     books.Add(book);
                 }
                 endRecord = response.Data.reviews.end;
@@ -176,8 +182,6 @@ namespace CultureVulture
             //if (book.Date != "") postRequest.AddParameter("review[read_at]", book.Date);
             postRequest.AddParameter("shelf", shelf);
             var postResponse = Client.Execute<Review>(postRequest);
-            Console.WriteLine(postResponse.Content,postResponse.StatusCode);
-            Console.WriteLine(postResponse.Data.id);
             string reviewID = postResponse.Data.id;
             return (bookID,reviewID);
         }
@@ -197,14 +201,12 @@ namespace CultureVulture
             //if (book.Date != "") putRequest.AddParameter("review[read_at]", book.Date);
             putRequest.AddParameter("shelf", shelf);
             var putResponse = Client.Execute(putRequest);
-            Console.WriteLine(putResponse.Content);
 
             //Edit shelf
             var postRequest = new RestRequest("shelf/add_to_shelf.xml", Method.POST);
             postRequest.AddParameter("book_id", book.GoodreadsBookID);
             postRequest.AddParameter("name", shelf);
             var postResponse = Client.Execute(postRequest);
-            Console.WriteLine(postResponse.Content);
         }
 
         public IRestResponse<T> ExecuteGetRequest<T>(RestRequest request)

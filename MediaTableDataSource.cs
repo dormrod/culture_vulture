@@ -23,7 +23,8 @@ namespace CultureVulture
 
         public void Sort(string key, bool ascending)
         {
-            
+            //Sort table by given column
+
 			switch (key)
             {
                 case "Media":

@@ -22,7 +22,7 @@ namespace CultureVulture
 
             // Do any additional setup after loading the view.
 
-            // Create the Product Table Data Source and populate it
+            // Create the media table data source and populate it
             var DataSource = new MediaTableDataSource();
             MediaTable.DataSource = DataSource;
             MediaTable.Delegate = new MediaTableDelegate(this,DataSource);
@@ -40,15 +40,14 @@ namespace CultureVulture
             set
             {
                 base.RepresentedObject = value;
-                // Update the view, if already loaded.
             }
         }
 
         partial void AddMediaClicked(NSObject sender)
         {
-            //Add media to database
+            //Add media to database from user form
 
-            //Create new media record
+            //Create new media record and add to local database
             string media = AddMediaMedia.TitleOfSelectedItem;
             string title = AddMediaTitle.StringValue;
             string creator = AddMediaCreator.StringValue;
@@ -73,7 +72,7 @@ namespace CultureVulture
 
         public void SearchMedia()
         {
-            //Search database for query
+            //Search database for user query
 
             //Open database connection 
             var conn = GetDatabaseConnection();
@@ -85,23 +84,23 @@ namespace CultureVulture
             string search = SearchMediaSearch.StringValue;
             command.CommandText = string.Format("SELECT * FROM media WHERE {0} LIKE '{1}';", field, search);
 
-            //Get IDs of results
+            //Get IDs of matching results
             SQLiteDataReader reader = command.ExecuteReader();
-            List<string> RecordIDs = new List<string>();
+            List<string> recordIDs = new List<string>();
             while (reader.Read())
             {
                 string ID = reader.GetString(0);
-                RecordIDs.Add(ID);
+                recordIDs.Add(ID);
             }
             conn.Close();
 
             //Get media records and update table
             var DataSource = new MediaTableDataSource();
-            foreach (string ID in RecordIDs)
+            foreach (string ID in recordIDs)
             {
-                var Record = new MediaModel();
-                Record.Load(conn, ID);
-                DataSource.MediaRecords.Add(Record);
+                var record = new MediaModel();
+                record.Load(conn, ID);
+                DataSource.MediaRecords.Add(record);
             }
             MediaTable.DataSource = DataSource;
             MediaTable.Delegate = new MediaTableDelegate(this, DataSource);
@@ -116,6 +115,7 @@ namespace CultureVulture
         partial void UnlockResetClicked(NSObject sender)
         {
             //Make hard reset button visible
+
             if (UnlockReset.State.ToString() == "Off")
 			{
                 HardReset.Transparent = true;
@@ -145,7 +145,8 @@ namespace CultureVulture
 
 		partial void GoodreadsAuthClicked(NSObject sender)
         {
-            //Generate auth link
+            //Generate auth link for goodreads
+			
 			var url = goodreads.GenerateAuthURL();
             GoodreadsAuthURL.Editable = true;
             GoodreadsAuthURL.StringValue = url;
@@ -153,7 +154,7 @@ namespace CultureVulture
 
         partial void GoodreadsVerifyClicked(NSObject sender)
         {
-            //Check auth successful
+            //Check goodreads auth successful
 
             var verified = goodreads.VerifyAuth();
             if(verified)
@@ -168,13 +169,16 @@ namespace CultureVulture
 
         partial void GoodreadsSyncClicked(NSObject sender)
         {
-            //Sync with account
+            //Sync with goodreads account
 
+            //Get sync options
             string syncType = GoodreadsSyncType.TitleOfSelectedItem;
             bool force;
             var conn = GetDatabaseConnection();
             if (ForceSyncOption.State.ToString() == "On") force = true;
             else force = false;
+
+            //Pull from goodreads
             if (syncType == "Pull") 
 			{
                 //Pull completed books
@@ -198,6 +202,7 @@ namespace CultureVulture
                     Book.Create(conn,force);
 				}
 			}
+            //Push to goodreads
             else
             {
                 //Push edited books to goodreads
@@ -216,7 +221,7 @@ namespace CultureVulture
                 }
                 conn.Close();
 
-                //Get edited media 
+                //Get edited books 
                 foreach (string ID in editedBookIDs)
                 {
                     var book = new MediaModel();
@@ -243,7 +248,7 @@ namespace CultureVulture
 					}
 				}                    
             }
-            SearchMedia();
+            SearchMedia(); //refresh search
         }
 
         private SQLiteConnection GetDatabaseConnection()

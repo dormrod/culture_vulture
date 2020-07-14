@@ -326,7 +326,7 @@ namespace CultureVulture
 						}
                     case ("edited"):
                         {
-                            //	command.CommandText = string.Format("UPDATE media SET {0}={1} WHERE id='{2}'",field,edited,id);
+                            //Do this case later as other cases also need to change edit field
                             break;
                         }
                 };

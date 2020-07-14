@@ -59,6 +59,7 @@ namespace CultureVulture
 
         private SQLiteConnection GetDatabaseConnection()
         {
+            //Set up database connection
             var documents = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             string db = Path.Combine(documents, ".media.db3");
 
