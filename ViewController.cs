@@ -228,10 +228,18 @@ namespace CultureVulture
                 foreach (MediaModel book in editedBooks)
                 {
                     //Add media without goodreads id
-                    if(book.GoodreadsID=="X")
+                    if(book.GoodreadsBookID=="X")
                     {
-                        var id = goodreads.PushNew(book);
-                        book.GoodreadsID = id;
+                        var res = goodreads.PushNew(book);
+                        book.GoodreadsBookID = res.bookID;
+                        book.GoodreadsReviewID = res.reviewID;
+                        book.Edited = false;
+					}
+					//Add media with existing id
+					else
+                    {
+                        goodreads.PushExisting(book);
+                        book.Edited = false;
 					}
 				}                    
             }

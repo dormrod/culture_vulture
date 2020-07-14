@@ -127,14 +127,14 @@ namespace CultureVulture
         }
 		
 		[Export("GoodreadsBookID")]
-        public string GoodreadsID
+        public string GoodreadsBookID
         {
             get { return goodreadsBookId; }
             set
             {
-                WillChangeValue("GoodreadsID");
+                WillChangeValue("GoodreadsBookID");
                 goodreadsBookId = value;
-                DidChangeValue("GoodreadsID");
+                DidChangeValue("GoodreadsBookID");
                 if (conn != null) Update(conn,"goodreadsBookId");
             }
         }
@@ -145,9 +145,9 @@ namespace CultureVulture
             get { return goodreadsReviewId; }
             set
             {
-                WillChangeValue("GoodreadsID");
+                WillChangeValue("GoodreadsReviewID");
                 goodreadsReviewId = value;
-                DidChangeValue("GoodreadsID");
+                DidChangeValue("GoodreadsReviewID");
                 if (conn != null) Update(conn,"goodreadsReviewId");
             }
         }
@@ -271,20 +271,9 @@ namespace CultureVulture
             // Clear last connection to prevent circular call to update
             conn = null;
 
-            //Update parameters
-            if (field == "edited") edited = false;
-            else edited = true;
-
             // Execute query
             connection.Open();
-   //         try
-   //         { 
-			//	connection.Open();
-			//}
-   //         catch
-   //         {
                
-			//}
             using (var command = connection.CreateCommand())
             {
                 // Create new command
@@ -337,12 +326,20 @@ namespace CultureVulture
 						}
                     case ("edited"):
                         {
-							command.CommandText = string.Format("UPDATE media SET {0}={1} WHERE id='{2}'",field,edited,id);
-                            break; 
-						}
-				};
+                            //	command.CommandText = string.Format("UPDATE media SET {0}={1} WHERE id='{2}'",field,edited,id);
+                            break;
+                        }
+                };
 
-                // Write to database
+                //Write to database and update edit status
+                if (field != "edited")
+                {
+					command.ExecuteNonQuery();
+                    edited = true;
+                }
+
+                // Update edit status
+				command.CommandText = string.Format("UPDATE media SET {0}={1} WHERE id='{2}'","edited",edited,id);
                 command.ExecuteNonQuery();
             }
             connection.Close();
@@ -388,7 +385,7 @@ namespace CultureVulture
                         status = (string)reader[7];
                         edited = (bool)reader[8];
                         goodreadsBookId = (string)reader[9];
-                        goodreadsBookId = (string)reader[10];
+                        goodreadsReviewId = (string)reader[10];
                     }
                 }
             }

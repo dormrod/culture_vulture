@@ -106,7 +106,7 @@ namespace CultureVulture
                 request.AddParameter("per_page", 200);
                 request.AddParameter("key", DeveloperKey);
                 var response = ExecuteGetRequest<ShelfResponse>(request);
-                Console.WriteLine(response.Content);
+                //Console.WriteLine(response.Content);
                 foreach (Review review in response.Data.reviews.reviews)
                 {
 
@@ -150,9 +150,9 @@ namespace CultureVulture
             return books;
         }
 
-        public string PushNew(MediaModel book)
+        public (string bookID, string reviewID) PushNew(MediaModel book)
         {
-            //Push new book to goodreads and return ID to update local record
+            //Push new book to goodreads and return IDs to update local record
 			
             //Search goodreads for book id and take top one
             var request = new RestRequest("search/index.xml", DataFormat.Xml);
@@ -163,17 +163,48 @@ namespace CultureVulture
             var response = Client.Execute<CatalogueSearch>(request);
             var deserialiser = new CustomXmlDeserialiser(); //Use custom deserialiser to handle non-escapted characters
             CatalogueSearch data = deserialiser.DeserializeRegEx<CatalogueSearch>(response);
-            var id = data.search.results.work[0].bestBook.id;
+            var bookID = data.search.results.work[0].bestBook.id;
 
             //Add book
+            string shelf="";
+            if (book.Status == "Completed") shelf = "read";
+            else if (book.Status == "In Progress") shelf = "currently-reading";
+            else if (book.Status == "Wish List") shelf = "to-read";
             var postRequest = new RestRequest("review.xml", Method.POST);
-            postRequest.AddParameter("book_id", id);
+            postRequest.AddParameter("book_id", bookID);
             if (book.Rating != 0) postRequest.AddParameter("review[rating]", book.Rating);
-            if (book.Date != "") postRequest.AddParameter("review[read_at]", book.Date);
-            postRequest.AddParameter("shelf", "read");
-            var postResponse = Client.Execute(postRequest);
+            //if (book.Date != "") postRequest.AddParameter("review[read_at]", book.Date);
+            postRequest.AddParameter("shelf", shelf);
+            var postResponse = Client.Execute<Review>(postRequest);
             Console.WriteLine(postResponse.Content,postResponse.StatusCode);
-            return id;
+            Console.WriteLine(postResponse.Data.id);
+            string reviewID = postResponse.Data.id;
+            return (bookID,reviewID);
+        }
+        
+		public void PushExisting(MediaModel book)
+        {
+            //Push existing book to goodreads by editing review
+
+            //Edit book review
+            string shelf = "";
+            if (book.Status == "Completed") shelf = "read";
+            else if (book.Status == "In Progress") shelf = "currently-reading";
+            else if (book.Status == "Wish List") shelf = "to-read";
+            var putRequest = new RestRequest(string.Format("review/{0}.xml", book.GoodreadsReviewID), Method.POST);
+            putRequest.AddParameter("id", book.GoodreadsReviewID);
+            putRequest.AddParameter("review[rating]", book.Rating);
+            //if (book.Date != "") putRequest.AddParameter("review[read_at]", book.Date);
+            putRequest.AddParameter("shelf", shelf);
+            var putResponse = Client.Execute(putRequest);
+            Console.WriteLine(putResponse.Content);
+
+            //Edit shelf
+            var postRequest = new RestRequest("shelf/add_to_shelf.xml", Method.POST);
+            postRequest.AddParameter("book_id", book.GoodreadsBookID);
+            postRequest.AddParameter("name", shelf);
+            var postResponse = Client.Execute(postRequest);
+            Console.WriteLine(postResponse.Content);
         }
 
         public IRestResponse<T> ExecuteGetRequest<T>(RestRequest request)

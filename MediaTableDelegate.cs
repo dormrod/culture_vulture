@@ -38,6 +38,7 @@ namespace CultureVulture
             // Wireup events
             view.TextField.EditingEnded += (sender, e) =>
             {
+                Console.WriteLine(DataSource.MediaRecords[(int)view.TextField.Tag].ID,view.TextField.StringValue);
                 DataSource.MediaRecords[(int)view.TextField.Tag].Connection = GetDatabaseConnection();
                 // Take action based on type
                 switch (view.Identifier)
